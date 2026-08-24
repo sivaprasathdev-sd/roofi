@@ -2,8 +2,13 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import dns from "dns";
 import { ensureUsersSeeded } from "../server/dist/config/db.js";
 import apiRoutes from "../server/dist/routes/apiRoutes.js";
+
+try {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+} catch (e) {}
 
 dotenv.config();
 
