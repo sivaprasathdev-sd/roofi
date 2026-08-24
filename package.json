@@ -6,7 +6,7 @@
     "dev": "npm --prefix client run dev",
     "server": "npm --prefix server run dev",
     "build": "npm run vercel-build",
-    "vercel-build": "cd server && npm install && npm run build && cd ../client && npm install && npm run build"
+    "vercel-build": "cd server && npm install --include=dev && npm run build && cd ../client && npm install --include=dev && npm run build"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
