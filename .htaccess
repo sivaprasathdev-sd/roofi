@@ -1,0 +1,77 @@
+# ==============================================================================
+# ROOFI - Apache Production Configuration
+# Domain: roofi.asnroofings.com
+# Node.js: 127.0.0.1:5039
+# ==============================================================================
+
+RewriteEngine On
+RewriteBase /
+
+# ==============================================================================
+# 1. API Reverse Proxy
+# ==============================================================================
+
+<IfModule mod_proxy.c>
+    RewriteRule ^api/(.*)$ http://127.0.0.1:5039/api/$1 [P,L,QSA]
+</IfModule>
+
+
+# ==============================================================================
+# 2. Uploads Reverse Proxy
+# ==============================================================================
+
+<IfModule mod_proxy.c>
+    RewriteRule ^uploads/(.*)$ http://127.0.0.1:5039/uploads/$1 [P,L,QSA]
+</IfModule>
+
+
+# ==============================================================================
+# 3. Security Headers
+# ==============================================================================
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+
+# ==============================================================================
+# 4. Protect Environment / Configuration Files
+# ==============================================================================
+
+<FilesMatch "^(\.env|\.env\..*|package\.json|package-lock\.json|tsconfig\.json)$">
+    Require all denied
+</FilesMatch>
+
+
+# ==============================================================================
+# 5. Allow Existing Files
+# ==============================================================================
+
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+
+# ==============================================================================
+# 6. Allow Existing Directories
+# ==============================================================================
+
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+
+# ==============================================================================
+# 7. React / Vite SPA Fallback
+# ==============================================================================
+
+RewriteRule ^ index.html [L]
+
+
+# ==============================================================================
+# 8. PHP Configuration - cPanel
+# ==============================================================================
+
+<IfModule mime_module>
+    AddHandler application/x-httpd-ea-php82 .php .php8 .phtml
+</IfModule>
