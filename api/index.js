@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import { ensureUsersSeeded } from "../server/dist/config/db.js";
+import apiRoutes from "../server/dist/routes/apiRoutes.js";
 
 dotenv.config();
 
@@ -19,6 +21,11 @@ async function connectDB() {
     "mongodb+srv://admin:admin123@sp-proj.0vlarpn.mongodb.net/roofi?retryWrites=true&w=majority&appName=Sp-proj";
   await mongoose.connect(mongoUri);
   isConnected = true;
+  try {
+    await ensureUsersSeeded();
+  } catch (e) {
+    console.warn("Vercel seeding warning:", e);
+  }
 }
 
 app.use(async (req, res, next) => {
@@ -31,8 +38,6 @@ app.use(async (req, res, next) => {
   }
 });
 
-// Import built server routes
-import apiRoutes from "../server/dist/routes/apiRoutes.js";
 app.use("/api", apiRoutes);
 
 app.get("/health", (_req, res) => {

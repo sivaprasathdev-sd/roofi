@@ -4,6 +4,16 @@
   "scripts": {
     "dev": "npm --prefix client run dev",
     "server": "npm --prefix server run dev",
-    "build": "npm --prefix client run build && npm --prefix server run build"
+    "build": "npm run vercel-build",
+    "vercel-build": "cd server && npm install && npm run build && cd ../client && npm install && npm run build"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^8.10.1",
+    "morgan": "^1.10.0"
   }
 }
