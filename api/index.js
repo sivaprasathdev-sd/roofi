@@ -231,6 +231,31 @@ app.put("/api/leads/:id", authMiddleware, async (req, res) => {
   try {
     const lead = await Lead.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
     if (!lead) return res.status(404).json({ message: "Lead not found" });
+
+    // Auto-create Customer when Lead is converted
+    if (lead.status === "Converted") {
+      const existingCust = await Customer.findOne({ leadId: lead.id });
+      if (!existingCust) {
+        const custCount = await Customer.countDocuments();
+        await Customer.create({
+          id: `CUST-${1001 + custCount}`,
+          name: lead.customerName,
+          phone: lead.phone,
+          email: lead.email || `${lead.id.toLowerCase()}@customer.com`,
+          location: lead.city || "Coimbatore",
+          address: lead.address || `${lead.city || "Coimbatore"}, ${lead.stateId || "TN"}`,
+          stateId: lead.stateId || "TN",
+          clusterId: lead.clusterId || "CL-001",
+          leadId: lead.id,
+          quotations: 1,
+          invoices: 0,
+          purchaseValue: lead.estValue || 0,
+          status: "Active",
+          createdDate: new Date().toISOString().slice(0, 10),
+        });
+      }
+    }
+
     res.json(lead);
   } catch (err) { res.status(500).json({ message: "Server error" }); }
 });
@@ -252,6 +277,31 @@ app.get("/api/leads/:id/logs", authMiddleware, async (req, res) => {
 // ─── Customers ────────────────────────────────────────────────────────────────
 app.get("/api/customers", authMiddleware, async (req, res) => {
   try {
+    // Auto-sync any converted lead without a customer record
+    const convertedLeads = await Lead.find({ status: "Converted" });
+    for (const lead of convertedLeads) {
+      const exists = await Customer.findOne({ leadId: lead.id });
+      if (!exists) {
+        const custCount = await Customer.countDocuments();
+        await Customer.create({
+          id: `CUST-${1001 + custCount}`,
+          name: lead.customerName,
+          phone: lead.phone,
+          email: lead.email || `${lead.id.toLowerCase()}@customer.com`,
+          location: lead.city || "Coimbatore",
+          address: lead.address || `${lead.city || "Coimbatore"}, ${lead.stateId || "TN"}`,
+          stateId: lead.stateId || "TN",
+          clusterId: lead.clusterId || "CL-001",
+          leadId: lead.id,
+          quotations: 1,
+          invoices: 0,
+          purchaseValue: lead.estValue || 0,
+          status: "Active",
+          createdDate: new Date().toISOString().slice(0, 10),
+        });
+      }
+    }
+
     const customers = await Customer.find({}).sort({ createdAt: -1 });
     res.json(customers);
   } catch (err) { res.status(500).json({ message: "Server error" }); }
