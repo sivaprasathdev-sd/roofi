@@ -1,6 +1,7 @@
 {
   "name": "roofi-lead-hub",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "npm --prefix client run dev",
     "server": "npm --prefix server run dev",
